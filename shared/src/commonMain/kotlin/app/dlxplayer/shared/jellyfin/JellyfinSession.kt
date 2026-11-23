@@ -48,6 +48,16 @@ class JellyfinSession internal constructor(
                 ).items
         }
 
+    /** Pages through the user's items, e.g. one library's contents. */
+    suspend fun items(query: ItemsQuery = ItemsQuery()): PagedItems<ItemDto> =
+        authorized {
+            client.apiGet<PagedItems<ItemDto>>(
+                path = "Users/${requireNotNull(userId) { "login reported no user id" }}/Items",
+                token = accessToken,
+                parameters = query.toParameters(),
+            )
+        }
+
     /**
      * Invalidates this session's token on the server. Once it returns,
      * further authenticated calls fail with [JellyfinSessionExpiredException].

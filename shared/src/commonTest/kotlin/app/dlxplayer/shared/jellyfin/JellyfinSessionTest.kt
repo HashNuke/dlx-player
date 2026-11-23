@@ -147,6 +147,74 @@ class JellyfinSessionTest {
         }
 
     @Test
+    fun `paged items query the library and parse the captured shape`() =
+        runTest {
+            var itemsPath: String? = null
+            var parentId: String? = null
+            var startIndex: String? = null
+            var limit: String? = null
+            var sortBy: String? = null
+            var fields: String? = null
+            var mediaTypes: String? = null
+            val engine =
+                MockEngine { request ->
+                    when (request.url.encodedPath) {
+                        "/Users/AuthenticateByName" -> {
+                            respond(AUTHENTICATION_RESULT_JSON, HttpStatusCode.OK, jsonResponseHeaders)
+                        }
+
+                        "/Users/2861f5b8509e46e9a6dca9a1c396501f/Items" -> {
+                            itemsPath = request.url.encodedPath
+                            parentId = request.url.parameters["parentId"]
+                            startIndex = request.url.parameters["startIndex"]
+                            limit = request.url.parameters["limit"]
+                            sortBy = request.url.parameters["sortBy"]
+                            fields = request.url.parameters["fields"]
+                            mediaTypes = request.url.parameters["mediaTypes"]
+                            respond(ITEMS_JSON, HttpStatusCode.OK, jsonResponseHeaders)
+                        }
+
+                        else -> {
+                            error("unexpected path: ${request.url.encodedPath}")
+                        }
+                    }
+                }
+
+            val page =
+                loggedInSession(engine).items(
+                    ItemsQuery(
+                        parentId = "f137a2dd21bbc1b99aa5c0f6bf02a805",
+                        startIndex = 0,
+                        limit = 20,
+                        sortBy = "SortName",
+                        fields = listOf("Overview", "Genres"),
+                        mediaTypes = listOf("Video"),
+                    ),
+                )
+
+            assertEquals("/Users/2861f5b8509e46e9a6dca9a1c396501f/Items", itemsPath)
+            assertEquals("f137a2dd21bbc1b99aa5c0f6bf02a805", parentId)
+            assertEquals("0", startIndex)
+            assertEquals("20", limit)
+            assertEquals("SortName", sortBy)
+            assertEquals("Overview,Genres", fields)
+            assertEquals("Video", mediaTypes)
+
+            assertEquals(1, page.totalRecordCount)
+            assertEquals(1, page.items.size)
+            val movie = page.items[0]
+            assertEquals("Sample Movie", movie.name)
+            assertEquals("a1d6b5566e7586a2ff99614f1950c129", movie.id)
+            assertEquals("Movie", movie.type)
+            assertEquals(2026, movie.productionYear)
+            assertEquals(600000000L, movie.runTimeTicks)
+            assertEquals("97f8cfef56c10461f535af44a7bcc136", movie.imageTags["Primary"])
+            assertEquals(0L, movie.userData?.playbackPositionTicks)
+            assertEquals(false, movie.userData?.played)
+            assertEquals(false, movie.userData?.isFavorite)
+        }
+
+    @Test
     fun `logout posts to the sessions logout route with the token`() =
         runTest {
             var logoutMethod: HttpMethod? = null

@@ -424,3 +424,48 @@ internal val VIEWS_JSON: String =
         "StartIndex": 0
     }
     """.trimIndent()
+
+/** `GET /Users/{userId}/Items?parentId=…&startIndex=0&limit=20&sortBy=SortName`
+ * with `fields=Overview,Genres&mediaTypes=Video` (captured 2026-11-23). */
+internal val ITEMS_JSON: String =
+    """
+    {
+        "Items": [
+            {
+                "Name": "Sample Movie",
+                "ServerId": "8453f97817bc46b7bafd71b3d2c3848c",
+                "Id": "a1d6b5566e7586a2ff99614f1950c129",
+                "Container": "mov,mp4,m4a,3gp,3g2,mj2",
+                "ChannelId": null,
+                "Genres": [],
+                "RunTimeTicks": 600000000,
+                "ProductionYear": 2026,
+                "IsFolder": false,
+                "Type": "Movie",
+                "GenreItems": [],
+                "UserData": {
+                    "PlaybackPositionTicks": 0,
+                    "PlayCount": 0,
+                    "IsFavorite": false,
+                    "Played": false,
+                    "Key": "a1d6b556-6e75-86a2-ff99-614f1950c129",
+                    "ItemId": "a1d6b5566e7586a2ff99614f1950c129"
+                },
+                "VideoType": "VideoFile",
+                "ImageTags": {
+                    "Primary": "97f8cfef56c10461f535af44a7bcc136"
+                },
+                "BackdropImageTags": [],
+                "ImageBlurHashes": {
+                    "Primary": {
+                        "97f8cfef56c10461f535af44a7bcc136": "W~KxSK${'$'}YSw*Zi%|royWnW;e;ahjZX4X4axe:ahfibvbEayV{a${'$'}k8"
+                    }
+                },
+                "LocationType": "FileSystem",
+                "MediaType": "Video"
+            }
+        ],
+        "TotalRecordCount": 1,
+        "StartIndex": 0
+    }
+    """.trimIndent()

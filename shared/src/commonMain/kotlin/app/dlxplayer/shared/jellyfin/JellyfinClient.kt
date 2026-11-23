@@ -8,6 +8,7 @@ import io.ktor.client.plugins.ResponseException
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.request.header
+import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -79,11 +80,13 @@ class JellyfinClient(
     internal suspend inline fun <reified T> apiGet(
         path: String,
         token: String? = null,
+        parameters: List<Pair<String, String>> = emptyList(),
     ): T =
         apiRequest {
             httpClient
                 .get("$apiBase/$path") {
                     header(HttpHeaders.Authorization, device.authorizationHeaderValue(token))
+                    parameters.forEach { (key, value) -> parameter(key, value) }
                 }.body()
         }
 
