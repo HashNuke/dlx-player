@@ -1,3 +1,3 @@
 package app.dlxplayer.shared
 
-val appDisplayName: String = "DLX Player"
+const val APP_DISPLAY_NAME: String = "DLX Player"

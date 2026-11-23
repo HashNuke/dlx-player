@@ -5,7 +5,7 @@ import SwiftUI
 struct DLXPlayerApp: App {
     var body: some Scene {
         WindowGroup {
-            Text(AppInfoKt.appDisplayName)
+            Text(AppInfoKt.APP_DISPLAY_NAME)
                 .font(.largeTitle)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
