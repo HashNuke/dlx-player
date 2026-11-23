@@ -4,11 +4,14 @@ import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 
 /**
  * Hermetic tests for [JellyfinSession]. Every test logs in through the
@@ -107,4 +110,102 @@ class JellyfinSessionTest {
 
             assertEquals("2861f5b8509e46e9a6dca9a1c396501f", loggedInSession(engine).userId)
         }
+
+    @Test
+    fun `logout posts to the sessions logout route with the token`() =
+        runTest {
+            var logoutMethod: HttpMethod? = null
+            var logoutPath: String? = null
+            var logoutAuthorizationHeader: String? = null
+            val engine =
+                MockEngine { request ->
+                    when (request.url.encodedPath) {
+                        "/Users/AuthenticateByName" -> {
+                            respond(AUTHENTICATION_RESULT_JSON, HttpStatusCode.OK, jsonResponseHeaders)
+                        }
+
+                        "/Sessions/Logout" -> {
+                            logoutMethod = request.method
+                            logoutPath = request.url.encodedPath
+                            logoutAuthorizationHeader = request.headers[HttpHeaders.Authorization]
+                            respond(content = "", status = HttpStatusCode.NoContent)
+                        }
+
+                        else -> {
+                            error("unexpected path: ${request.url.encodedPath}")
+                        }
+                    }
+                }
+
+            loggedInSession(engine).logout()
+
+            assertEquals(HttpMethod.Post, logoutMethod)
+            assertEquals("/Sessions/Logout", logoutPath)
+            assertEquals(
+                """MediaBrowser Client="DLX Player", Device="Pixel 9", DeviceId="device-1", """ +
+                    """Version="0.1.0", Token="f6547397831d44718e44f89bc0d66ced"""",
+                logoutAuthorizationHeader,
+            )
+        }
+
+    @Test
+    fun `mid-session unauthorized surfaces as session expired`() =
+        runTest {
+            val engine =
+                MockEngine { request ->
+                    when (request.url.encodedPath) {
+                        "/Users/AuthenticateByName" -> {
+                            respond(AUTHENTICATION_RESULT_JSON, HttpStatusCode.OK, jsonResponseHeaders)
+                        }
+
+                        "/Users/Me" -> {
+                            respond(
+                                content = "Error processing request.",
+                                status = HttpStatusCode.Unauthorized,
+                                headers = textResponseHeaders,
+                            )
+                        }
+
+                        else -> {
+                            error("unexpected path: ${request.url.encodedPath}")
+                        }
+                    }
+                }
+
+            val error = assertFailsWith<JellyfinSessionExpiredException> { loggedInSession(engine).me() }
+            assertEquals(HttpStatusCode.Unauthorized, error.statusCode)
+        }
+
+    @Test
+    fun `a bad login is not reported as session expired`() =
+        runTest {
+            val engine =
+                MockEngine {
+                    respond(
+                        content = "Error processing request.",
+                        status = HttpStatusCode.Unauthorized,
+                        headers = textResponseHeaders,
+                    )
+                }
+            val client =
+                JellyfinClient(
+                    baseUrl = "http://192.168.1.10:8096",
+                    device = TEST_DEVICE,
+                    engine = engine,
+                )
+
+            val error =
+                assertFailsWith<JellyfinHttpException> {
+                    client.authenticateByName(
+                        username = "root",
+                        password = "wrong",
+                    )
+                }
+
+            assertEquals(HttpStatusCode.Unauthorized, error.statusCode)
+            assertFalse(error is JellyfinSessionExpiredException)
+        }
+
+    private val textResponseHeaders =
+        headersOf(HttpHeaders.ContentType to listOf(ContentType.Text.Plain.toString()))
 }

@@ -87,6 +87,22 @@ class JellyfinClient(
                 }.body()
         }
 
+    /**
+     * POSTs an API route without a request body (e.g. /Sessions/Logout),
+     * authorized like [apiGet]. The response body is not read.
+     */
+    internal suspend fun apiPost(
+        path: String,
+        token: String? = null,
+    ) {
+        apiRequest {
+            httpClient
+                .post("$apiBase/$path") {
+                    header(HttpHeaders.Authorization, device.authorizationHeaderValue(token))
+                }
+        }
+    }
+
     /** Fetches public server details without requiring credentials. */
     suspend fun publicSystemInfo(): PublicSystemInfo =
         apiRequest { httpClient.get("$apiBase/System/Info/Public").body() }

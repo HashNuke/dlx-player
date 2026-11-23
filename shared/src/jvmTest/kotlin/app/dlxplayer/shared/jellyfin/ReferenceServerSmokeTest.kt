@@ -1,8 +1,10 @@
 package app.dlxplayer.shared.jellyfin
 
+import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
@@ -47,5 +49,37 @@ class ReferenceServerSmokeTest {
             val auth = client.authenticateByName(username = "root", password = password)
             assertNotNull(auth.accessToken, "login should issue an access token")
             assertEquals("root", auth.user?.name)
+        }
+
+    @Test
+    fun `session answers who am i and logout expires the token`() =
+        runTest {
+            if (refUrl == null) return@runTest
+
+            val client =
+                JellyfinClient(
+                    baseUrl = refUrl,
+                    device =
+                        DeviceInfo(
+                            clientName = "DLX Player",
+                            deviceName = "Dev Smoke",
+                            deviceId = "smoke-1",
+                            version = "0.1.0",
+                        ),
+                )
+            val password = System.getenv("JELLYFIN_REF_PASSWORD") ?: "dlx-test-pass"
+            val session = client.session(client.authenticateByName(username = "root", password = password))
+
+            val me = session.me()
+            assertEquals("root", me.name)
+            assertEquals(session.userId, me.id)
+
+            val info = session.systemInfo()
+            assertEquals("DLX Reference", info.serverName)
+            assertTrue(info.version!!.isNotBlank(), "authenticated system info should report a version")
+
+            session.logout()
+            val expired = assertFailsWith<JellyfinSessionExpiredException> { session.me() }
+            assertEquals(HttpStatusCode.Unauthorized, expired.statusCode)
         }
 }
