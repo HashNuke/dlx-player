@@ -6,7 +6,9 @@ spotless = "8.12.0"
 ktlint = "1.8.0"
 ktor = "3.6.1"
 kotlinx-coroutines = "1.11.0"
-kotlinx-serialization = "1.13.0"
+# Pinned: 1.12+/1.13.0 native klibs are built with Kotlin 2.4.10 (KLIB ABI 2.4.0),
+# which this project's Kotlin 2.3.21 cannot consume; bump together with a Kotlin upgrade.
+kotlinx-serialization = "1.11.0"
 
 [libraries]
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
