@@ -515,3 +515,54 @@ internal val RESUME_JSON: String =
         "StartIndex": 0
     }
     """.trimIndent()
+
+/** `GET /Shows/NextUp?UserId=…` with episode 1 partially watched (captured 2026-11-23):
+ * the server's next-up is the in-progress episode itself, carrying season and
+ * series ids plus the resume position in UserData. */
+internal val NEXTUP_JSON: String =
+    """
+    {
+        "Items": [
+            {
+                "Name": "Demo Show S01E01 - Episode 1",
+                "ServerId": "1dbcdd642f644482b13bce814f8e6ccb",
+                "Id": "6becb517aba42ed659f2a5280c9988f3",
+                "Container": "mov,mp4,m4a,3gp,3g2,mj2",
+                "ChannelId": null,
+                "RunTimeTicks": 3200000000,
+                "IndexNumber": 1,
+                "ParentIndexNumber": 1,
+                "IsFolder": false,
+                "Type": "Episode",
+                "UserData": {
+                    "PlayedPercentage": 18.75,
+                    "PlaybackPositionTicks": 600000000,
+                    "PlayCount": 1,
+                    "IsFavorite": false,
+                    "LastPlayedDate": "2026-11-23T05:00:06.0800982Z",
+                    "Played": false,
+                    "Key": "6becb517-aba4-2ed6-59f2-a5280c9988f3",
+                    "ItemId": "6becb517aba42ed659f2a5280c9988f3"
+                },
+                "SeriesName": "Demo Show",
+                "SeriesId": "997a914658183ac33bb8e7b24f7129f7",
+                "SeasonId": "2cfd607d4da7e741c01adc926ef8f7b0",
+                "SeasonName": "Season 1",
+                "VideoType": "VideoFile",
+                "ImageTags": {
+                    "Primary": "f0a681594b744fdf1f097dc39afdae52"
+                },
+                "BackdropImageTags": [],
+                "ImageBlurHashes": {
+                    "Primary": {
+                        "f0a681594b744fdf1f097dc39afdae52": "W~KxPE${'$'}YW-*Zj0|=t7W-W;aPWpjaWYSxX4aiWXfiXRj=WVWBnmj?"
+                    }
+                },
+                "LocationType": "FileSystem",
+                "MediaType": "Video"
+            }
+        ],
+        "TotalRecordCount": 1,
+        "StartIndex": 0
+    }
+    """.trimIndent()

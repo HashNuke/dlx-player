@@ -69,6 +69,16 @@ class JellyfinSession internal constructor(
             )
         }
 
+    /** The episode of any show the user should watch next. */
+    suspend fun nextUp(): PagedItems<ItemDto> =
+        authorized {
+            client.apiGet<PagedItems<ItemDto>>(
+                path = "Shows/NextUp",
+                token = accessToken,
+                parameters = listOf("UserId" to requireNotNull(userId) { "login reported no user id" }),
+            )
+        }
+
     /**
      * URL of one of an item's images, ready for players and image loaders
      * that cannot send headers: the session token rides in the query as

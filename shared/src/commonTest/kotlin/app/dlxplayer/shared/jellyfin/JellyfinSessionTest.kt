@@ -278,6 +278,42 @@ class JellyfinSessionTest {
         }
 
     @Test
+    fun `next up returns the show episode to watch next`() =
+        runTest {
+            var nextUpPath: String? = null
+            var nextUpUserId: String? = null
+            val engine =
+                MockEngine { request ->
+                    when (request.url.encodedPath) {
+                        "/Users/AuthenticateByName" -> {
+                            respond(AUTHENTICATION_RESULT_JSON, HttpStatusCode.OK, jsonResponseHeaders)
+                        }
+
+                        "/Shows/NextUp" -> {
+                            nextUpPath = request.url.encodedPath
+                            nextUpUserId = request.url.parameters["UserId"]
+                            respond(NEXTUP_JSON, HttpStatusCode.OK, jsonResponseHeaders)
+                        }
+
+                        else -> {
+                            error("unexpected path: ${request.url.encodedPath}")
+                        }
+                    }
+                }
+
+            val page = loggedInSession(engine).nextUp()
+
+            assertEquals("/Shows/NextUp", nextUpPath)
+            assertEquals("2861f5b8509e46e9a6dca9a1c396501f", nextUpUserId)
+            assertEquals(1, page.totalRecordCount)
+            val episode = page.items[0]
+            assertEquals("Demo Show S01E01 - Episode 1", episode.name)
+            assertEquals("Episode", episode.type)
+            assertEquals("Demo Show", episode.seriesName)
+            assertEquals(600000000L, episode.userData?.playbackPositionTicks)
+        }
+
+    @Test
     fun `logout posts to the sessions logout route with the token`() =
         runTest {
             var logoutMethod: HttpMethod? = null
