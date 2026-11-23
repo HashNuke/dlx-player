@@ -115,4 +115,44 @@ class ReferenceServerSmokeTest {
             assertTrue(source.supportsDirectPlay, "the seeded mp4 should direct-play")
             assertTrue(info.playSessionId!!.isNotBlank(), "the server should issue a play session id")
         }
+
+    @Test
+    fun `reported playback round-trips into continue watching`() =
+        runTest {
+            if (refUrl == null) return@runTest
+
+            val client =
+                JellyfinClient(
+                    baseUrl = refUrl,
+                    device =
+                        DeviceInfo(
+                            clientName = "DLX Player",
+                            deviceName = "Dev Smoke",
+                            deviceId = "smoke-1",
+                            version = "0.1.0",
+                        ),
+                )
+            val password = System.getenv("JELLYFIN_REF_PASSWORD") ?: "dlx-test-pass"
+            val session = client.session(client.authenticateByName(username = "root", password = password))
+
+            val movies =
+                session.views().first { it.name == "Movies" && it.collectionType == "movies" }
+            val movie =
+                session.items(ItemsQuery(parentId = movies.id)).items.first { it.type == "Movie" }
+            val info = session.playbackInfo(movie.id!!)
+
+            val reporter =
+                session.playbackReporter(
+                    itemId = movie.id,
+                    playSessionId = info.playSessionId,
+                    mediaSourceId = info.mediaSources.first().id,
+                )
+            reporter.start(positionTicks = 0)
+            reporter.progress(positionTicks = 1_200_000_000)
+            reporter.stop(positionTicks = 1_200_000_000)
+
+            val resumed = session.resumeItems().items.first { it.id == movie.id }
+            assertEquals(1_200_000_000L, resumed.userData?.playbackPositionTicks)
+            assertEquals(false, resumed.userData?.played)
+        }
 }
