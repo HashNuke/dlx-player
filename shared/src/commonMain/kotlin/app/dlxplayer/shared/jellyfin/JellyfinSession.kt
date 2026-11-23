@@ -140,6 +140,78 @@ class JellyfinSession internal constructor(
             }.buildString()
 
     /**
+     * Progressive video URL — the original file, playable when the client
+     * can direct play the container. Stream routes accept the token only
+     * as `ApiKey` (verified live; `api_key` is rejected by the HLS and
+     * universal routes).
+     */
+    fun videoStreamUrl(
+        itemId: String,
+        container: String = "mp4",
+        mediaSourceId: String? = null,
+    ): String =
+        URLBuilder("${client.apiBase}/Videos/$itemId/stream.$container")
+            .apply {
+                parameters.append("ApiKey", accessToken)
+                mediaSourceId?.let { parameters.append("MediaSourceId", it) }
+            }.buildString()
+
+    /** HLS master playlist URL for adaptive playback of a video. */
+    fun hlsMasterPlaylistUrl(
+        itemId: String,
+        mediaSourceId: String? = null,
+    ): String = hlsPlaylistUrl(itemId, "master", mediaSourceId)
+
+    /**
+     * URL of one HLS segment. Players normally follow the ready-made
+     * segment URLs inside the media playlist; this builder covers
+     * composing them (route requires the ticks params, verified live).
+     */
+    fun hlsSegmentUrl(
+        itemId: String,
+        segmentId: Int,
+        actualSegmentLengthTicks: Long,
+        mediaSourceId: String? = null,
+        runtimeTicks: Long = 0,
+        container: String = "ts",
+    ): String =
+        URLBuilder("${client.apiBase}/Videos/$itemId/hls1/main/$segmentId.$container")
+            .apply {
+                parameters.append("MediaSourceId", mediaSourceId ?: itemId)
+                parameters.append("ApiKey", accessToken)
+                parameters.append("runtimeTicks", runtimeTicks.toString())
+                parameters.append("actualSegmentLengthTicks", actualSegmentLengthTicks.toString())
+            }.buildString()
+
+    /**
+     * Universal audio URL — direct streams when [container] matches the
+     * source, transcodes otherwise. Carries the device identity like
+     * the official web client does.
+     */
+    fun audioUniversalUrl(
+        itemId: String,
+        container: String = "mp3",
+    ): String =
+        URLBuilder("${client.apiBase}/Audio/$itemId/universal")
+            .apply {
+                parameters.append("DeviceId", client.device.deviceId)
+                userId?.let { parameters.append("UserId", it) }
+                parameters.append("container", container)
+                parameters.append("ApiKey", accessToken)
+            }.buildString()
+
+    private fun hlsPlaylistUrl(
+        itemId: String,
+        playlist: String,
+        mediaSourceId: String?,
+    ): String =
+        URLBuilder("${client.apiBase}/Videos/$itemId/$playlist.m3u8")
+            .apply {
+                parameters.append("MediaSourceId", mediaSourceId ?: itemId)
+                parameters.append("ApiKey", accessToken)
+            }.buildString()
+
+    /**
      * Invalidates this session's token on the server. Once it returns,
      * further authenticated calls fail with [JellyfinSessionExpiredException].
      */

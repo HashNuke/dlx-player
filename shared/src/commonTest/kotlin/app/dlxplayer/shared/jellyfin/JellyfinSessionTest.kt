@@ -458,6 +458,40 @@ class JellyfinSessionTest {
         }
 
     @Test
+    fun `stream url builders cover progressive hls and universal audio`() =
+        runTest {
+            val engine =
+                MockEngine { _ ->
+                    respond(AUTHENTICATION_RESULT_JSON, HttpStatusCode.OK, jsonResponseHeaders)
+                }
+            val session = loggedInSession(engine)
+            val itemId = "a1d6b5566e7586a2ff99614f1950c129"
+
+            assertEquals(
+                "http://192.168.1.10:8096/Videos/$itemId/stream.mp4" +
+                    "?ApiKey=f6547397831d44718e44f89bc0d66ced",
+                session.videoStreamUrl(itemId),
+            )
+            assertEquals(
+                "http://192.168.1.10:8096/Videos/$itemId/master.m3u8" +
+                    "?MediaSourceId=$itemId&ApiKey=f6547397831d44718e44f89bc0d66ced",
+                session.hlsMasterPlaylistUrl(itemId),
+            )
+            assertEquals(
+                "http://192.168.1.10:8096/Videos/$itemId/hls1/main/0.ts" +
+                    "?MediaSourceId=$itemId&ApiKey=f6547397831d44718e44f89bc0d66ced" +
+                    "&runtimeTicks=0&actualSegmentLengthTicks=60000000",
+                session.hlsSegmentUrl(itemId = itemId, segmentId = 0, actualSegmentLengthTicks = 60_000_000L),
+            )
+            assertEquals(
+                "http://192.168.1.10:8096/Audio/717297981e0e89b3d6babdf1c95f7559/universal" +
+                    "?DeviceId=device-1&UserId=2861f5b8509e46e9a6dca9a1c396501f&container=mp3" +
+                    "&ApiKey=f6547397831d44718e44f89bc0d66ced",
+                session.audioUniversalUrl(itemId = "717297981e0e89b3d6babdf1c95f7559"),
+            )
+        }
+
+    @Test
     fun `logout posts to the sessions logout route with the token`() =
         runTest {
             var logoutMethod: HttpMethod? = null
