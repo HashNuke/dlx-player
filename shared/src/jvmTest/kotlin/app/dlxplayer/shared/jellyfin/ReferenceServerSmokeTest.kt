@@ -82,4 +82,37 @@ class ReferenceServerSmokeTest {
             val expired = assertFailsWith<JellyfinSessionExpiredException> { session.me() }
             assertEquals(HttpStatusCode.Unauthorized, expired.statusCode)
         }
+
+    @Test
+    fun `playback info direct-plays the seeded movie`() =
+        runTest {
+            if (refUrl == null) return@runTest
+
+            val client =
+                JellyfinClient(
+                    baseUrl = refUrl,
+                    device =
+                        DeviceInfo(
+                            clientName = "DLX Player",
+                            deviceName = "Dev Smoke",
+                            deviceId = "smoke-1",
+                            version = "0.1.0",
+                        ),
+                )
+            val password = System.getenv("JELLYFIN_REF_PASSWORD") ?: "dlx-test-pass"
+            val session = client.session(client.authenticateByName(username = "root", password = password))
+
+            val movies =
+                session.views().first { it.name == "Movies" && it.collectionType == "movies" }
+            val movie =
+                session.items(ItemsQuery(parentId = movies.id)).items.first { it.type == "Movie" }
+
+            val info = session.playbackInfo(movie.id!!)
+
+            assertEquals(1, info.mediaSources.size)
+            val source = info.mediaSources[0]
+            assertEquals("mp4", source.container)
+            assertTrue(source.supportsDirectPlay, "the seeded mp4 should direct-play")
+            assertTrue(info.playSessionId!!.isNotBlank(), "the server should issue a play session id")
+        }
 }

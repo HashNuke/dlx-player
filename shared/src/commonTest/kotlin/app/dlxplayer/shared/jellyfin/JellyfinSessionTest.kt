@@ -2,6 +2,7 @@ package app.dlxplayer.shared.jellyfin
 
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
+import io.ktor.client.engine.mock.toByteArray
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
@@ -403,6 +404,57 @@ class JellyfinSessionTest {
             assertEquals(1, first.parentIndexNumber)
             assertEquals(600000000L, first.userData?.playbackPositionTicks)
             assertEquals(3, episodes.items[2].indexNumber)
+        }
+
+    @Test
+    fun `playback info posts a device profile and parses media sources`() =
+        runTest {
+            var playbackPath: String? = null
+            var playbackMethod: HttpMethod? = null
+            var playbackBody: String? = null
+            val engine =
+                MockEngine { request ->
+                    when (request.url.encodedPath) {
+                        "/Users/AuthenticateByName" -> {
+                            respond(AUTHENTICATION_RESULT_JSON, HttpStatusCode.OK, jsonResponseHeaders)
+                        }
+
+                        "/Items/a1d6b5566e7586a2ff99614f1950c129/PlaybackInfo" -> {
+                            playbackPath = request.url.encodedPath
+                            playbackMethod = request.method
+                            playbackBody = request.body.toByteArray().decodeToString()
+                            respond(PLAYBACK_INFO_JSON, HttpStatusCode.OK, jsonResponseHeaders)
+                        }
+
+                        else -> {
+                            error("unexpected path: ${request.url.encodedPath}")
+                        }
+                    }
+                }
+
+            val info = loggedInSession(engine).playbackInfo("a1d6b5566e7586a2ff99614f1950c129")
+
+            assertEquals("/Items/a1d6b5566e7586a2ff99614f1950c129/PlaybackInfo", playbackPath)
+            assertEquals(HttpMethod.Post, playbackMethod)
+            assertEquals(
+                """{"DeviceProfile":{"MaxStreamingBitrate":120000000,"DirectPlayProfiles":""" +
+                    """[{"Container":"mp4","Type":"Video"}]}}""",
+                playbackBody,
+            )
+            assertEquals("d70b42474a2040a4a2d92aecb708a581", info.playSessionId)
+            assertEquals(1, info.mediaSources.size)
+            val source = info.mediaSources[0]
+            assertEquals("a1d6b5566e7586a2ff99614f1950c129", source.id)
+            assertEquals("mp4", source.container)
+            assertEquals(4000000000L, source.runTimeTicks)
+            assertEquals(true, source.supportsDirectPlay)
+            assertEquals(true, source.supportsDirectStream)
+            assertEquals(false, source.supportsTranscoding)
+            assertEquals(2, source.mediaStreams.size)
+            assertEquals("Video", source.mediaStreams[0].type)
+            assertEquals("h264", source.mediaStreams[0].codec)
+            assertEquals("Audio", source.mediaStreams[1].type)
+            assertEquals("aac", source.mediaStreams[1].codec)
         }
 
     @Test

@@ -92,6 +92,24 @@ class JellyfinClient(
         }
 
     /**
+     * POSTs an API route with a JSON request body, authorized with the
+     * device identity and, when the caller holds one, the session token.
+     */
+    internal suspend inline fun <reified T> apiPostJson(
+        path: String,
+        token: String? = null,
+        body: Any? = null,
+    ): T =
+        apiRequest {
+            httpClient
+                .post("$apiBase/$path") {
+                    header(HttpHeaders.Authorization, device.authorizationHeaderValue(token))
+                    contentType(ContentType.Application.Json)
+                    setBody(body)
+                }.body()
+        }
+
+    /**
      * POSTs an API route without a request body (e.g. /Sessions/Logout),
      * authorized like [apiGet]. The response body is not read.
      */

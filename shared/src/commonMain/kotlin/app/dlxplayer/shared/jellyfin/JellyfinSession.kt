@@ -100,6 +100,27 @@ class JellyfinSession internal constructor(
         }
 
     /**
+     * Asks the server how to play an item: its media sources with the
+     * direct-play/direct-stream/transcode decision, plus a play session
+     * id for the subsequent playback reports.
+     */
+    suspend fun playbackInfo(
+        itemId: String,
+        deviceProfile: DeviceProfile =
+            DeviceProfile(
+                maxStreamingBitrate = 120_000_000,
+                directPlayProfiles = listOf(DirectPlayProfile(container = "mp4", type = "Video")),
+            ),
+    ): PlaybackInfo =
+        authorized {
+            client.apiPostJson<PlaybackInfo>(
+                path = "Items/$itemId/PlaybackInfo",
+                token = accessToken,
+                body = PlaybackInfoRequest(deviceProfile = deviceProfile),
+            )
+        }
+
+    /**
      * URL of one of an item's images, ready for players and image loaders
      * that cannot send headers: the session token rides in the query as
      * `api_key` (confirmed against the reference server), sizing via

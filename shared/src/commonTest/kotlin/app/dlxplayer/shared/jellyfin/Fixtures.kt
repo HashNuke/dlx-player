@@ -726,3 +726,115 @@ internal val EPISODES_JSON: String =
         "StartIndex": 0
     }
     """.trimIndent()
+
+/** `POST /Items/{id}/PlaybackInfo?UserId=…` with a minimal DeviceProfile
+ * (MaxStreamingBitrate + an mp4 DirectPlay profile; captured 2026-11-23).
+ * The seeded movie answers SupportsDirectPlay/SupportsDirectStream true and
+ * SupportsTranscoding false, with its h264 + aac MediaStreams. */
+internal val PLAYBACK_INFO_JSON: String =
+    """
+    {
+        "MediaSources": [
+            {
+                "Protocol": "File",
+                "Id": "a1d6b5566e7586a2ff99614f1950c129",
+                "Path": "/media/movies/Sample Movie (2026).mp4",
+                "Type": "Default",
+                "Container": "mp4",
+                "Size": 21018055,
+                "Name": "Sample Movie (2026)",
+                "IsRemote": false,
+                "ETag": "ae5cc43b99296a7432439f138568ca61",
+                "RunTimeTicks": 4000000000,
+                "ReadAtNativeFramerate": false,
+                "IgnoreDts": false,
+                "IgnoreIndex": false,
+                "GenPtsInput": false,
+                "SupportsTranscoding": false,
+                "SupportsDirectStream": true,
+                "SupportsDirectPlay": true,
+                "IsInfiniteStream": false,
+                "UseMostCompatibleTranscodingProfile": false,
+                "RequiresOpening": false,
+                "RequiresClosing": false,
+                "RequiresLooping": false,
+                "SupportsProbing": true,
+                "VideoType": "VideoFile",
+                "MediaStreams": [
+                    {
+                        "Codec": "h264",
+                        "CodecTag": "avc1",
+                        "Language": "und",
+                        "TimeBase": "1/12288",
+                        "VideoRange": "SDR",
+                        "VideoRangeType": "SDR",
+                        "AudioSpatialFormat": "None",
+                        "DisplayTitle": "360p H264 SDR",
+                        "NalLengthSize": "4",
+                        "IsInterlaced": false,
+                        "IsAVC": true,
+                        "BitRate": 344929,
+                        "BitDepth": 8,
+                        "RefFrames": 1,
+                        "IsDefault": true,
+                        "IsForced": false,
+                        "IsHearingImpaired": false,
+                        "IsOriginal": false,
+                        "Height": 360,
+                        "Width": 640,
+                        "AverageFrameRate": 24,
+                        "RealFrameRate": 24,
+                        "ReferenceFrameRate": 24,
+                        "Profile": "High",
+                        "Type": "Video",
+                        "AspectRatio": "16:9",
+                        "Index": 0,
+                        "IsExternal": false,
+                        "IsTextSubtitleStream": false,
+                        "SupportsExternalStream": false,
+                        "PixelFormat": "yuv420p",
+                        "Level": 30,
+                        "IsAnamorphic": false
+                    },
+                    {
+                        "Codec": "aac",
+                        "CodecTag": "mp4a",
+                        "Language": "und",
+                        "TimeBase": "1/44100",
+                        "VideoRange": "Unknown",
+                        "VideoRangeType": "Unknown",
+                        "AudioSpatialFormat": "None",
+                        "LocalizedDefault": "Default",
+                        "LocalizedExternal": "External",
+                        "LocalizedLanguage": "Undetermined",
+                        "LocalizedOriginal": "Original",
+                        "DisplayTitle": "AAC - Mono - Default",
+                        "IsInterlaced": false,
+                        "ChannelLayout": "mono",
+                        "BitRate": 69281,
+                        "Channels": 1,
+                        "SampleRate": 44100,
+                        "IsDefault": true,
+                        "IsForced": false,
+                        "IsHearingImpaired": false,
+                        "IsOriginal": false,
+                        "Profile": "LC",
+                        "Type": "Audio",
+                        "Index": 1,
+                        "IsExternal": false,
+                        "IsTextSubtitleStream": false,
+                        "SupportsExternalStream": false
+                    }
+                ],
+                "MediaAttachments": [],
+                "Formats": [],
+                "Bitrate": 420361,
+                "RequiredHttpHeaders": {},
+                "TranscodingSubProtocol": "http",
+                "DefaultAudioStreamIndex": 1,
+                "HasSegments": false
+            }
+        ],
+        "PlaySessionId": "d70b42474a2040a4a2d92aecb708a581"
+    }
+    """.trimIndent()
