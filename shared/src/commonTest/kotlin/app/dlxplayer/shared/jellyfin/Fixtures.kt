@@ -134,3 +134,131 @@ internal val AUTHENTICATION_RESULT_JSON: String =
         "ServerId": "4a828cdb4fc0494184c5d45b616d6423"
     }
     """.trimIndent()
+
+/** `GET /Users/Me` with a valid token (captured 2026-11-23). */
+internal val USERS_ME_JSON: String =
+    """
+    {
+        "Name": "root",
+        "ServerId": "4a828cdb4fc0494184c5d45b616d6423",
+        "Id": "2861f5b8509e46e9a6dca9a1c396501f",
+        "HasPassword": true,
+        "HasConfiguredPassword": true,
+        "HasConfiguredEasyPassword": false,
+        "EnableAutoLogin": false,
+        "LastLoginDate": "2026-11-23T04:25:38.8474949Z",
+        "LastActivityDate": "2026-11-23T04:25:38.8474949Z",
+        "Configuration": {
+            "PlayDefaultAudioTrack": true,
+            "SubtitleLanguagePreference": "",
+            "DisplayMissingEpisodes": false,
+            "GroupedFolders": [],
+            "SubtitleMode": "Default",
+            "DisplayCollectionsView": false,
+            "EnableLocalPassword": false,
+            "OrderedViews": [],
+            "LatestItemsExcludes": [],
+            "MyMediaExcludes": [],
+            "HidePlayedInLatest": true,
+            "RememberAudioSelections": true,
+            "RememberSubtitleSelections": true,
+            "EnableNextEpisodeAutoPlay": true,
+            "CastReceiverId": "F007D354"
+        },
+        "Policy": {
+            "IsAdministrator": true,
+            "IsHidden": true,
+            "EnableCollectionManagement": false,
+            "EnableSubtitleManagement": false,
+            "EnableLyricManagement": false,
+            "IsDisabled": false,
+            "BlockedTags": [],
+            "AllowedTags": [],
+            "EnableUserPreferenceAccess": true,
+            "AccessSchedules": [],
+            "BlockUnratedItems": [],
+            "EnableRemoteControlOfOtherUsers": true,
+            "EnableSharedDeviceControl": true,
+            "EnableRemoteAccess": true,
+            "EnableLiveTvManagement": false,
+            "EnableLiveTvAccess": true,
+            "EnableMediaPlayback": true,
+            "EnableAudioPlaybackTranscoding": true,
+            "EnableVideoPlaybackTranscoding": true,
+            "EnablePlaybackRemuxing": true,
+            "ForceRemoteSourceTranscoding": false,
+            "EnableContentDeletion": true,
+            "EnableContentDeletionFromFolders": [],
+            "EnableContentDownloading": true,
+            "EnableSyncTranscoding": true,
+            "EnableMediaConversion": true,
+            "EnabledDevices": [],
+            "EnableAllDevices": true,
+            "EnabledChannels": [],
+            "EnableAllChannels": true,
+            "EnabledFolders": [],
+            "EnableAllFolders": true,
+            "InvalidLoginAttemptCount": 0,
+            "LoginAttemptsBeforeLockout": -1,
+            "MaxActiveSessions": 0,
+            "EnablePublicSharing": true,
+            "BlockedMediaFolders": [],
+            "BlockedChannels": [],
+            "RemoteClientBitrateLimit": 0,
+            "AuthenticationProviderId": "Jellyfin.Server.Implementations.Users.DefaultAuthenticationProvider",
+            "PasswordResetProviderId": "Jellyfin.Server.Implementations.Users.DefaultPasswordResetProvider",
+            "SyncPlayAccess": "CreateAndJoinGroups"
+        }
+    }
+    """.trimIndent()
+
+/** `GET /System/Info` with a valid token (captured 2026-11-23). */
+internal val SYSTEM_INFO_JSON: String =
+    """
+    {
+        "OperatingSystemDisplayName": "",
+        "HasPendingRestart": false,
+        "IsShuttingDown": false,
+        "SupportsLibraryMonitor": true,
+        "WebSocketPortNumber": 8096,
+        "CompletedInstallations": [],
+        "CanSelfRestart": true,
+        "CanLaunchWebBrowser": false,
+        "ProgramDataPath": "/config",
+        "WebPath": "/jellyfin/jellyfin-web",
+        "ItemsByNamePath": "/config/metadata",
+        "CachePath": "/cache",
+        "LogPath": "/config/log",
+        "InternalMetadataPath": "/config/metadata",
+        "TranscodingTempPath": "/cache/transcodes",
+        "CastReceiverApplications": [
+            {
+                "Id": "F007D354",
+                "Name": "Stable"
+            },
+            {
+                "Id": "6F511C87",
+                "Name": "Unstable"
+            }
+        ],
+        "HasUpdateAvailable": false,
+        "EncoderLocation": "System",
+        "SystemArchitecture": "X64",
+        "LocalAddress": "http://172.17.0.2:8096",
+        "ServerName": "DLX Reference",
+        "Version": "12.4.0",
+        "ProductName": "Jellyfin Server",
+        "OperatingSystem": "",
+        "Id": "4a828cdb4fc0494184c5d45b616d6423",
+        "StartupWizardCompleted": true
+    }
+    """.trimIndent()
+
+/** Device identity shared by the hermetic tests. */
+internal val TEST_DEVICE =
+    DeviceInfo(
+        clientName = "DLX Player",
+        deviceName = "Pixel 9",
+        deviceId = "device-1",
+        version = "0.1.0",
+    )

@@ -116,5 +116,6 @@ class JellyfinClient(
                 requireNotNull(auth.accessToken) {
                     "authentication result carried no access token; cannot start a session"
                 },
+            userId = auth.user?.id,
         )
 }

@@ -12,7 +12,12 @@ class JellyfinSession internal constructor(
     private val client: JellyfinClient,
     /** Token issued by the login that started this session. */
     val accessToken: String,
+    /** Server-side id of the logged-in user, from the login response. */
+    val userId: String? = null,
 ) {
     /** The user this session is logged in as, per the server. */
     suspend fun me(): UserDto = client.apiGet(path = "Users/Me", token = accessToken)
+
+    /** Server details as reported to authenticated clients. */
+    suspend fun systemInfo(): SystemInfo = client.apiGet(path = "System/Info", token = accessToken)
 }

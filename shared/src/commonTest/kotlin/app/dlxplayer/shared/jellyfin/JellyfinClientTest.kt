@@ -173,14 +173,4 @@ class JellyfinClientTest {
                 }
             assertEquals(HttpStatusCode.Unauthorized, error.statusCode)
         }
-
-    companion object {
-        val TEST_DEVICE =
-            DeviceInfo(
-                clientName = "DLX Player",
-                deviceName = "Pixel 9",
-                deviceId = "device-1",
-                version = "0.1.0",
-            )
-    }
 }
