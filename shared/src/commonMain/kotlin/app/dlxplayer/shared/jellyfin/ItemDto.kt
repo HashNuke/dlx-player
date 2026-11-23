@@ -16,6 +16,10 @@ data class ItemsQuery(
     val fields: List<String> = emptyList(),
     /** Media type filter, e.g. `Video`, `Audio`. */
     val mediaTypes: List<String> = emptyList(),
+    /** Item filters, e.g. `IsFavorite`, `IsUnplayed` (verified live). */
+    val filters: List<String> = emptyList(),
+    /** Free-text search over item names (verified live). */
+    val searchTerm: String? = null,
 ) {
     internal fun toParameters(): List<Pair<String, String>> =
         buildList {
@@ -25,6 +29,8 @@ data class ItemsQuery(
             sortBy?.let { add("sortBy" to it) }
             if (fields.isNotEmpty()) add("fields" to fields.joinToString(","))
             if (mediaTypes.isNotEmpty()) add("mediaTypes" to mediaTypes.joinToString(","))
+            if (filters.isNotEmpty()) add("Filters" to filters.joinToString(","))
+            searchTerm?.let { add("searchTerm" to it) }
         }
 }
 

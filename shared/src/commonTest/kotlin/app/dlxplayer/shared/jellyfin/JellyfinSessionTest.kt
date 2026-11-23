@@ -314,6 +314,44 @@ class JellyfinSessionTest {
         }
 
     @Test
+    fun `favorites filter and search term reuse the items query`() =
+        runTest {
+            var filters: String? = null
+            var searchTerm: String? = null
+            val engine =
+                MockEngine { request ->
+                    when (request.url.encodedPath) {
+                        "/Users/AuthenticateByName" -> {
+                            respond(AUTHENTICATION_RESULT_JSON, HttpStatusCode.OK, jsonResponseHeaders)
+                        }
+
+                        "/Users/2861f5b8509e46e9a6dca9a1c396501f/Items" -> {
+                            filters = request.url.parameters["Filters"]
+                            searchTerm = request.url.parameters["searchTerm"]
+                            respond(ITEMS_JSON, HttpStatusCode.OK, jsonResponseHeaders)
+                        }
+
+                        else -> {
+                            error("unexpected path: ${request.url.encodedPath}")
+                        }
+                    }
+                }
+            val session = loggedInSession(engine)
+
+            session.items(ItemsQuery(filters = listOf("IsFavorite")))
+            assertEquals("IsFavorite", filters)
+            assertEquals(null, searchTerm)
+
+            session.items(ItemsQuery(searchTerm = "Sample"))
+            assertEquals(null, filters)
+            assertEquals("Sample", searchTerm)
+
+            session.items(ItemsQuery(searchTerm = "Sample", filters = listOf("IsFavorite", "IsUnplayed")))
+            assertEquals("IsFavorite,IsUnplayed", filters)
+            assertEquals("Sample", searchTerm)
+        }
+
+    @Test
     fun `logout posts to the sessions logout route with the token`() =
         runTest {
             var logoutMethod: HttpMethod? = null
