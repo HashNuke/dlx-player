@@ -492,6 +492,64 @@ class JellyfinSessionTest {
         }
 
     @Test
+    fun `reporter sends start progress and stop with position and method`() =
+        runTest {
+            val reports = mutableListOf<Pair<String, String>>()
+            val engine =
+                MockEngine { request ->
+                    when (request.url.encodedPath) {
+                        "/Users/AuthenticateByName" -> {
+                            respond(AUTHENTICATION_RESULT_JSON, HttpStatusCode.OK, jsonResponseHeaders)
+                        }
+
+                        "/Sessions/Playing",
+                        "/Sessions/Playing/Progress",
+                        "/Sessions/Playing/Stopped",
+                        -> {
+                            reports += request.url.encodedPath to request.body.toByteArray().decodeToString()
+                            respond(content = "", status = HttpStatusCode.NoContent)
+                        }
+
+                        else -> {
+                            error("unexpected path: ${request.url.encodedPath}")
+                        }
+                    }
+                }
+            val session = loggedInSession(engine)
+
+            val reporter =
+                session.playbackReporter(
+                    itemId = "a1d6b5566e7586a2ff99614f1950c129",
+                    playSessionId = "d70b42474a2040a4a2d92aecb708a581",
+                )
+            reporter.start(positionTicks = 0)
+            reporter.progress(positionTicks = 600_000_000)
+            reporter.stop(positionTicks = 600_000_000)
+
+            assertEquals(
+                listOf("/Sessions/Playing", "/Sessions/Playing/Progress", "/Sessions/Playing/Stopped"),
+                reports.map { it.first },
+            )
+            val itemId = "a1d6b5566e7586a2ff99614f1950c129"
+            val playSessionId = "d70b42474a2040a4a2d92aecb708a581"
+            assertEquals(
+                """{"ItemId":"$itemId","MediaSourceId":"$itemId","PlaySessionId":"$playSessionId",""" +
+                    """"PositionTicks":0,"IsPaused":false,"PlayMethod":"DirectPlay"}""",
+                reports[0].second,
+            )
+            assertEquals(
+                """{"ItemId":"$itemId","MediaSourceId":"$itemId","PlaySessionId":"$playSessionId",""" +
+                    """"PositionTicks":600000000,"IsPaused":false,"PlayMethod":"DirectPlay"}""",
+                reports[1].second,
+            )
+            assertEquals(
+                """{"ItemId":"$itemId","MediaSourceId":"$itemId","PlaySessionId":"$playSessionId",""" +
+                    """"PositionTicks":600000000,"IsPaused":false,"PlayMethod":"DirectPlay"}""",
+                reports[2].second,
+            )
+        }
+
+    @Test
     fun `logout posts to the sessions logout route with the token`() =
         runTest {
             var logoutMethod: HttpMethod? = null

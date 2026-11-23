@@ -11,6 +11,7 @@ import io.ktor.client.request.header
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
@@ -94,19 +95,20 @@ class JellyfinClient(
     /**
      * POSTs an API route with a JSON request body, authorized with the
      * device identity and, when the caller holds one, the session token.
+     * The response is returned unparsed (report routes answer 204).
      */
-    internal suspend inline fun <reified T> apiPostJson(
+    internal suspend fun apiPostJson(
         path: String,
         token: String? = null,
         body: Any? = null,
-    ): T =
+    ): HttpResponse =
         apiRequest {
             httpClient
                 .post("$apiBase/$path") {
                     header(HttpHeaders.Authorization, device.authorizationHeaderValue(token))
                     contentType(ContentType.Application.Json)
                     setBody(body)
-                }.body()
+                }
         }
 
     /**

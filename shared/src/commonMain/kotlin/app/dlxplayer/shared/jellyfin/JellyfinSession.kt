@@ -1,5 +1,6 @@
 package app.dlxplayer.shared.jellyfin
 
+import io.ktor.client.call.body
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.URLBuilder
 
@@ -113,12 +114,41 @@ class JellyfinSession internal constructor(
             ),
     ): PlaybackInfo =
         authorized {
-            client.apiPostJson<PlaybackInfo>(
-                path = "Items/$itemId/PlaybackInfo",
-                token = accessToken,
-                body = PlaybackInfoRequest(deviceProfile = deviceProfile),
-            )
+            client
+                .apiPostJson(
+                    path = "Items/$itemId/PlaybackInfo",
+                    token = accessToken,
+                    body = PlaybackInfoRequest(deviceProfile = deviceProfile),
+                ).body()
         }
+
+    /**
+     * Creates a reporter for one playback, driven from the player's
+     * callbacks. [playSessionId] comes from [playbackInfo].
+     */
+    fun playbackReporter(
+        itemId: String,
+        playSessionId: String? = null,
+        mediaSourceId: String? = null,
+        playMethod: String = "DirectPlay",
+    ): PlaybackReporter =
+        PlaybackReporter(
+            session = this,
+            report =
+                PlaybackReport(
+                    itemId = itemId,
+                    mediaSourceId = mediaSourceId ?: itemId,
+                    playSessionId = playSessionId,
+                    playMethod = playMethod,
+                ),
+        )
+
+    internal suspend fun reportPlayback(
+        path: String,
+        report: PlaybackReport,
+    ) {
+        authorized { client.apiPostJson(path = path, token = accessToken, body = report) }
+    }
 
     /**
      * URL of one of an item's images, ready for players and image loaders
