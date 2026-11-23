@@ -79,6 +79,26 @@ class JellyfinSession internal constructor(
             )
         }
 
+    /** The seasons of a show, in order. */
+    suspend fun seasons(seriesId: String): PagedItems<ItemDto> =
+        authorized {
+            client.apiGet<PagedItems<ItemDto>>(
+                path = "Shows/$seriesId/Seasons",
+                token = accessToken,
+                parameters = listOf("UserId" to requireNotNull(userId) { "login reported no user id" }),
+            )
+        }
+
+    /** All episodes of a show, in season and episode order. */
+    suspend fun episodes(seriesId: String): PagedItems<ItemDto> =
+        authorized {
+            client.apiGet<PagedItems<ItemDto>>(
+                path = "Shows/$seriesId/Episodes",
+                token = accessToken,
+                parameters = listOf("UserId" to requireNotNull(userId) { "login reported no user id" }),
+            )
+        }
+
     /**
      * URL of one of an item's images, ready for players and image loaders
      * that cannot send headers: the session token rides in the query as

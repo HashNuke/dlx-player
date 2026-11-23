@@ -352,6 +352,60 @@ class JellyfinSessionTest {
         }
 
     @Test
+    fun `seasons and episodes parse parent child relations`() =
+        runTest {
+            var seasonsUserId: String? = null
+            var episodesUserId: String? = null
+            val seriesId = "997a914658183ac33bb8e7b24f7129f7"
+            val engine =
+                MockEngine { request ->
+                    when (request.url.encodedPath) {
+                        "/Users/AuthenticateByName" -> {
+                            respond(AUTHENTICATION_RESULT_JSON, HttpStatusCode.OK, jsonResponseHeaders)
+                        }
+
+                        "/Shows/$seriesId/Seasons" -> {
+                            seasonsUserId = request.url.parameters["UserId"]
+                            respond(SEASONS_JSON, HttpStatusCode.OK, jsonResponseHeaders)
+                        }
+
+                        "/Shows/$seriesId/Episodes" -> {
+                            episodesUserId = request.url.parameters["UserId"]
+                            respond(EPISODES_JSON, HttpStatusCode.OK, jsonResponseHeaders)
+                        }
+
+                        else -> {
+                            error("unexpected path: ${request.url.encodedPath}")
+                        }
+                    }
+                }
+            val session = loggedInSession(engine)
+
+            val seasons = session.seasons(seriesId)
+            assertEquals("2861f5b8509e46e9a6dca9a1c396501f", seasonsUserId)
+            assertEquals(1, seasons.totalRecordCount)
+            val season = seasons.items[0]
+            assertEquals("Season 1", season.name)
+            assertEquals("Season", season.type)
+            assertEquals(1, season.indexNumber)
+            assertEquals(seriesId, season.seriesId)
+
+            val episodes = session.episodes(seriesId)
+            assertEquals("2861f5b8509e46e9a6dca9a1c396501f", episodesUserId)
+            assertEquals(3, episodes.totalRecordCount)
+            val first = episodes.items[0]
+            assertEquals("Demo Show S01E01 - Episode 1", first.name)
+            assertEquals("Episode", first.type)
+            assertEquals("2cfd607d4da7e741c01adc926ef8f7b0", first.seasonId)
+            assertEquals("Season 1", first.seasonName)
+            assertEquals(seriesId, first.seriesId)
+            assertEquals(1, first.indexNumber)
+            assertEquals(1, first.parentIndexNumber)
+            assertEquals(600000000L, first.userData?.playbackPositionTicks)
+            assertEquals(3, episodes.items[2].indexNumber)
+        }
+
+    @Test
     fun `logout posts to the sessions logout route with the token`() =
         runTest {
             var logoutMethod: HttpMethod? = null

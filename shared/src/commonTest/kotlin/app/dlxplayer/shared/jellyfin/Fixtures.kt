@@ -566,3 +566,163 @@ internal val NEXTUP_JSON: String =
         "StartIndex": 0
     }
     """.trimIndent()
+
+/** `GET /Shows/{seriesId}/Seasons?UserId=…` (captured 2026-11-23). */
+internal val SEASONS_JSON: String =
+    """
+    {
+        "Items": [
+            {
+                "Name": "Season 1",
+                "ServerId": "1dbcdd642f644482b13bce814f8e6ccb",
+                "Id": "2cfd607d4da7e741c01adc926ef8f7b0",
+                "ChannelId": null,
+                "IndexNumber": 1,
+                "IsFolder": true,
+                "Type": "Season",
+                "UserData": {
+                    "PlayedPercentage": 0,
+                    "UnplayedItemCount": 3,
+                    "PlaybackPositionTicks": 0,
+                    "PlayCount": 0,
+                    "IsFavorite": false,
+                    "Played": false,
+                    "Key": "997a9146-5818-3ac3-3bb8-e7b24f7129f7001",
+                    "ItemId": "2cfd607d4da7e741c01adc926ef8f7b0"
+                },
+                "SeriesName": "Demo Show",
+                "SeriesId": "997a914658183ac33bb8e7b24f7129f7",
+                "ImageTags": {},
+                "BackdropImageTags": [],
+                "ImageBlurHashes": {},
+                "LocationType": "FileSystem",
+                "MediaType": "Unknown"
+            }
+        ],
+        "TotalRecordCount": 1,
+        "StartIndex": 0
+    }
+    """.trimIndent()
+
+/** `GET /Shows/{seriesId}/Episodes?UserId=…` with episode 1 partially watched
+ * (captured 2026-11-23): episodes carry SeasonId/SeasonName/SeriesId plus
+ * index numbers and the resume position in UserData. */
+internal val EPISODES_JSON: String =
+    """
+    {
+        "Items": [
+            {
+                "Name": "Demo Show S01E01 - Episode 1",
+                "ServerId": "1dbcdd642f644482b13bce814f8e6ccb",
+                "Id": "6becb517aba42ed659f2a5280c9988f3",
+                "Container": "mov,mp4,m4a,3gp,3g2,mj2",
+                "ChannelId": null,
+                "RunTimeTicks": 3200000000,
+                "IndexNumber": 1,
+                "ParentIndexNumber": 1,
+                "IsFolder": false,
+                "Type": "Episode",
+                "UserData": {
+                    "PlayedPercentage": 18.75,
+                    "PlaybackPositionTicks": 600000000,
+                    "PlayCount": 1,
+                    "IsFavorite": false,
+                    "LastPlayedDate": "2026-11-23T05:00:06.0800982Z",
+                    "Played": false,
+                    "Key": "6becb517-aba4-2ed6-59f2-a5280c9988f3",
+                    "ItemId": "6becb517aba42ed659f2a5280c9988f3"
+                },
+                "SeriesName": "Demo Show",
+                "SeriesId": "997a914658183ac33bb8e7b24f7129f7",
+                "SeasonId": "2cfd607d4da7e741c01adc926ef8f7b0",
+                "SeasonName": "Season 1",
+                "VideoType": "VideoFile",
+                "ImageTags": {
+                    "Primary": "f0a681594b744fdf1f097dc39afdae52"
+                },
+                "BackdropImageTags": [],
+                "ImageBlurHashes": {
+                    "Primary": {
+                        "f0a681594b744fdf1f097dc39afdae52": "W~KxPE${'$'}YW-*Zj0|=t7W-W;aPWpjaWYSxX4aiWXfiXRj=WVWBnmj?"
+                    }
+                },
+                "LocationType": "FileSystem",
+                "MediaType": "Video"
+            },
+            {
+                "Name": "Demo Show S01E02 - Episode 2",
+                "ServerId": "1dbcdd642f644482b13bce814f8e6ccb",
+                "Id": "2e2d4ea68f2d3a8ef97f32f19b2cf727",
+                "Container": "mov,mp4,m4a,3gp,3g2,mj2",
+                "ChannelId": null,
+                "RunTimeTicks": 3200000000,
+                "IndexNumber": 2,
+                "ParentIndexNumber": 1,
+                "IsFolder": false,
+                "Type": "Episode",
+                "UserData": {
+                    "PlaybackPositionTicks": 0,
+                    "PlayCount": 0,
+                    "IsFavorite": false,
+                    "Played": false,
+                    "Key": "997a9146-5818-3ac3-3bb8-e7b24f7129f7001002",
+                    "ItemId": "2e2d4ea68f2d3a8ef97f32f19b2cf727"
+                },
+                "SeriesName": "Demo Show",
+                "SeriesId": "997a914658183ac33bb8e7b24f7129f7",
+                "SeasonId": "2cfd607d4da7e741c01adc926ef8f7b0",
+                "SeasonName": "Season 1",
+                "VideoType": "VideoFile",
+                "ImageTags": {
+                    "Primary": "3f294e15c3cd997e08c8b9b45ff514b0"
+                },
+                "BackdropImageTags": [],
+                "ImageBlurHashes": {
+                    "Primary": {
+                        "3f294e15c3cd997e08c8b9b45ff514b0": "W~KxPE${'$'}YW-*Zj0|=t7W-W;aPWpjaWYSxX4aiWXfiXRj=WVWBnmj?"
+                    }
+                },
+                "LocationType": "FileSystem",
+                "MediaType": "Video"
+            },
+            {
+                "Name": "Demo Show S01E03 - Episode 3",
+                "ServerId": "1dbcdd642f644482b13bce814f8e6ccb",
+                "Id": "b2da9418f3d3a02c9e3467854c6c2c0e",
+                "Container": "mov,mp4,m4a,3gp,3g2,mj2",
+                "ChannelId": null,
+                "RunTimeTicks": 3200000000,
+                "IndexNumber": 3,
+                "ParentIndexNumber": 1,
+                "IsFolder": false,
+                "Type": "Episode",
+                "UserData": {
+                    "PlaybackPositionTicks": 0,
+                    "PlayCount": 0,
+                    "IsFavorite": false,
+                    "Played": false,
+                    "Key": "997a9146-5818-3ac3-3bb8-e7b24f7129f7001003",
+                    "ItemId": "b2da9418f3d3a02c9e3467854c6c2c0e"
+                },
+                "SeriesName": "Demo Show",
+                "SeriesId": "997a914658183ac33bb8e7b24f7129f7",
+                "SeasonId": "2cfd607d4da7e741c01adc926ef8f7b0",
+                "SeasonName": "Season 1",
+                "VideoType": "VideoFile",
+                "ImageTags": {
+                    "Primary": "199ad9638179b5e3594579298ff6da73"
+                },
+                "BackdropImageTags": [],
+                "ImageBlurHashes": {
+                    "Primary": {
+                        "199ad9638179b5e3594579298ff6da73": "W~KxPE${'$'}YW-*Zj0|=t7W-W;aPWpjaWYSxX4aiWXfiXRj=WVWBnmj?"
+                    }
+                },
+                "LocationType": "FileSystem",
+                "MediaType": "Video"
+            }
+        ],
+        "TotalRecordCount": 3,
+        "StartIndex": 0
+    }
+    """.trimIndent()

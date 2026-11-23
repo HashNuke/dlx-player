@@ -6,6 +6,10 @@ complexity:
     threshold: 80
   LongParameterList:
     active: false
+  TooManyFunctions:
+    # JellyfinSession is the API facade: one suspend fun per server route,
+    # and the milestone roadmap keeps adding routes to it.
+    thresholdInClasses: 20
 exceptions:
   TooGenericExceptionCaught:
     active: false

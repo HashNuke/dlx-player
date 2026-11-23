@@ -47,17 +47,24 @@ data class UserDataDto(
 
 /**
  * The item subset the client consumes: identity, kind, year, runtime,
- * user state and image tags. Jellyfin items carry far more fields; the
- * unknown ones are ignored.
+ * user state, image tags and TV nesting. Jellyfin items carry far more
+ * fields; the unknown ones are ignored.
  */
 @Serializable
 data class ItemDto(
     @SerialName("Name") val name: String? = null,
     @SerialName("Id") val id: String? = null,
-    /** Item kind, e.g. `Movie`, `Series`, `Episode`, `Audio`. */
+    /** Item kind, e.g. `Movie`, `Series`, `Season`, `Episode`, `Audio`. */
     @SerialName("Type") val type: String? = null,
     @SerialName("ProductionYear") val productionYear: Int? = null,
     @SerialName("SeriesName") val seriesName: String? = null,
+    @SerialName("SeriesId") val seriesId: String? = null,
+    @SerialName("SeasonName") val seasonName: String? = null,
+    @SerialName("SeasonId") val seasonId: String? = null,
+    /** Episode or season number within its parent. */
+    @SerialName("IndexNumber") val indexNumber: Int? = null,
+    /** Season number of an episode. */
+    @SerialName("ParentIndexNumber") val parentIndexNumber: Int? = null,
     /** Runtime in Jellyfin ticks (100ns units). */
     @SerialName("RunTimeTicks") val runTimeTicks: Long? = null,
     @SerialName("UserData") val userData: UserDataDto? = null,
