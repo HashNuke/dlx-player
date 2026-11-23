@@ -215,6 +215,32 @@ class JellyfinSessionTest {
         }
 
     @Test
+    fun `image urls carry image type sizing and api key`() =
+        runTest {
+            val engine =
+                MockEngine { _ ->
+                    respond(AUTHENTICATION_RESULT_JSON, HttpStatusCode.OK, jsonResponseHeaders)
+                }
+            val session = loggedInSession(engine)
+
+            assertEquals(
+                "http://192.168.1.10:8096/Items/a1d6b5566e7586a2ff99614f1950c129/Images/Primary" +
+                    "?api_key=f6547397831d44718e44f89bc0d66ced&maxWidth=100&maxHeight=56",
+                session.imageUrl(
+                    itemId = "a1d6b5566e7586a2ff99614f1950c129",
+                    imageType = "Primary",
+                    maxWidth = 100,
+                    maxHeight = 56,
+                ),
+            )
+            assertEquals(
+                "http://192.168.1.10:8096/Items/a1d6b5566e7586a2ff99614f1950c129/Images/Backdrop" +
+                    "?api_key=f6547397831d44718e44f89bc0d66ced",
+                session.imageUrl(itemId = "a1d6b5566e7586a2ff99614f1950c129", imageType = "Backdrop"),
+            )
+        }
+
+    @Test
     fun `logout posts to the sessions logout route with the token`() =
         runTest {
             var logoutMethod: HttpMethod? = null

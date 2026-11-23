@@ -53,7 +53,8 @@ class JellyfinClient(
     val device: DeviceInfo,
     engine: HttpClientEngine? = null,
 ) {
-    private val apiBase: String = baseUrl.trimEnd('/')
+    /** Server root without a trailing slash; API routes and image URLs hang off it. */
+    internal val apiBase: String = baseUrl.trimEnd('/')
 
     private val configureClient: HttpClientConfig<*>.() -> Unit = {
         expectSuccess = true

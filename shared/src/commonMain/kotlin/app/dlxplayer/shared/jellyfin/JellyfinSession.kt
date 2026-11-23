@@ -1,6 +1,7 @@
 package app.dlxplayer.shared.jellyfin
 
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.URLBuilder
 
 /**
  * An authenticated Jellyfin session, started from a successful login via
@@ -57,6 +58,25 @@ class JellyfinSession internal constructor(
                 parameters = query.toParameters(),
             )
         }
+
+    /**
+     * URL of one of an item's images, ready for players and image loaders
+     * that cannot send headers: the session token rides in the query as
+     * `api_key` (confirmed against the reference server), sizing via
+     * `maxWidth`/`maxHeight`.
+     */
+    fun imageUrl(
+        itemId: String,
+        imageType: String,
+        maxWidth: Int? = null,
+        maxHeight: Int? = null,
+    ): String =
+        URLBuilder("${client.apiBase}/Items/$itemId/Images/$imageType")
+            .apply {
+                parameters.append("api_key", accessToken)
+                maxWidth?.let { parameters.append("maxWidth", it.toString()) }
+                maxHeight?.let { parameters.append("maxHeight", it.toString()) }
+            }.buildString()
 
     /**
      * Invalidates this session's token on the server. Once it returns,
