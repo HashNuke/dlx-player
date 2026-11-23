@@ -112,6 +112,41 @@ class JellyfinSessionTest {
         }
 
     @Test
+    fun `views lists the user's libraries`() =
+        runTest {
+            var viewsPath: String? = null
+            val engine =
+                MockEngine { request ->
+                    when (request.url.encodedPath) {
+                        "/Users/AuthenticateByName" -> {
+                            respond(AUTHENTICATION_RESULT_JSON, HttpStatusCode.OK, jsonResponseHeaders)
+                        }
+
+                        "/Users/2861f5b8509e46e9a6dca9a1c396501f/Views" -> {
+                            viewsPath = request.url.encodedPath
+                            respond(VIEWS_JSON, HttpStatusCode.OK, jsonResponseHeaders)
+                        }
+
+                        else -> {
+                            error("unexpected path: ${request.url.encodedPath}")
+                        }
+                    }
+                }
+
+            val views = loggedInSession(engine).views()
+
+            assertEquals("/Users/2861f5b8509e46e9a6dca9a1c396501f/Views", viewsPath)
+            assertEquals(3, views.size)
+            assertEquals("Movies", views[0].name)
+            assertEquals("f137a2dd21bbc1b99aa5c0f6bf02a805", views[0].id)
+            assertEquals("movies", views[0].collectionType)
+            assertEquals("Music", views[1].name)
+            assertEquals("music", views[1].collectionType)
+            assertEquals("Shows", views[2].name)
+            assertEquals("tvshows", views[2].collectionType)
+        }
+
+    @Test
     fun `logout posts to the sessions logout route with the token`() =
         runTest {
             var logoutMethod: HttpMethod? = null

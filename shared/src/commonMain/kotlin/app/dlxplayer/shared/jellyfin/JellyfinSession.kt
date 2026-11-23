@@ -38,6 +38,16 @@ class JellyfinSession internal constructor(
     /** Server details as reported to authenticated clients. */
     suspend fun systemInfo(): SystemInfo = authorized { client.apiGet(path = "System/Info", token = accessToken) }
 
+    /** The user's libraries (views), e.g. Movies, Shows, Music. */
+    suspend fun views(): List<LibraryDto> =
+        authorized {
+            client
+                .apiGet<PagedItems<LibraryDto>>(
+                    path = "Users/${requireNotNull(userId) { "login reported no user id" }}/Views",
+                    token = accessToken,
+                ).items
+        }
+
     /**
      * Invalidates this session's token on the server. Once it returns,
      * further authenticated calls fail with [JellyfinSessionExpiredException].
