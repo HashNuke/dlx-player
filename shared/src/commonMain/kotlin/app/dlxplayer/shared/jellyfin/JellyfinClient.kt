@@ -1,0 +1,91 @@
+package app.dlxplayer.shared.jellyfin
+
+import io.ktor.client.HttpClient
+import io.ktor.client.HttpClientConfig
+import io.ktor.client.call.body
+import io.ktor.client.engine.HttpClientEngine
+import io.ktor.client.plugins.ResponseException
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.request.get
+import io.ktor.client.request.header
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
+import io.ktor.http.contentType
+import io.ktor.serialization.kotlinx.json.json
+import kotlinx.serialization.json.Json
+
+/**
+ * Identity of the app installation, sent with every authenticated request
+ * as the `Authorization: MediaBrowser ...` header.
+ */
+data class DeviceInfo(
+    val clientName: String,
+    val deviceName: String,
+    val deviceId: String,
+    val version: String,
+) {
+    /** Builds the `MediaBrowser Client="...", Device="...", ...` header value. */
+    fun authorizationHeaderValue(): String =
+        buildString {
+            append("MediaBrowser")
+            append(" Client=\"").append(clientName).append('"')
+            append(", Device=\"").append(deviceName).append('"')
+            append(", DeviceId=\"").append(deviceId).append('"')
+            append(", Version=\"").append(version).append('"')
+        }
+}
+
+/**
+ * Client for a single Jellyfin server.
+ *
+ * @param baseUrl server root, e.g. `http://192.168.1.10:8096` (with or
+ *   without a trailing slash)
+ * @param device identifies this app installation to the server
+ * @param engine HTTP engine to run on; `null` picks the platform default.
+ *   Tests inject Ktor's [io.ktor.client.engine.mock.MockEngine].
+ */
+class JellyfinClient(
+    val baseUrl: String,
+    val device: DeviceInfo,
+    engine: HttpClientEngine? = null,
+) {
+    private val apiBase: String = baseUrl.trimEnd('/')
+
+    private val configureClient: HttpClientConfig<*>.() -> Unit = {
+        expectSuccess = true
+        install(ContentNegotiation) {
+            json(Json { ignoreUnknownKeys = true })
+        }
+    }
+
+    internal val httpClient: HttpClient =
+        if (engine == null) HttpClient(configureClient) else HttpClient(engine, configureClient)
+
+    /** Runs an API call, translating HTTP error statuses to [JellyfinHttpException]. */
+    private suspend fun <T> apiRequest(request: suspend () -> T): T =
+        try {
+            request()
+        } catch (cause: ResponseException) {
+            throw JellyfinHttpException(statusCode = cause.response.status, cause = cause)
+        }
+
+    /** Fetches public server details without requiring credentials. */
+    suspend fun publicSystemInfo(): PublicSystemInfo =
+        apiRequest { httpClient.get("$apiBase/System/Info/Public").body() }
+
+    /** Logs in with a username and password, returning the issued access token. */
+    suspend fun authenticateByName(
+        username: String,
+        password: String,
+    ): AuthenticationResult =
+        apiRequest {
+            httpClient
+                .post("$apiBase/Users/AuthenticateByName") {
+                    header(HttpHeaders.Authorization, device.authorizationHeaderValue())
+                    contentType(ContentType.Application.Json)
+                    setBody(AuthenticateByNameRequest(username = username, password = password))
+                }.body()
+        }
+}
