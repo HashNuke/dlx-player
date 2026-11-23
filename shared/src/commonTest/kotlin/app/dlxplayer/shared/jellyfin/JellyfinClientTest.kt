@@ -92,6 +92,63 @@ class JellyfinClientTest {
         }
 
     @Test
+    fun `session requests carry the access token in the authorization header`() =
+        runTest {
+            var meRequestPath: String? = null
+            var meAuthorizationHeader: String? = null
+            val engine =
+                MockEngine { request ->
+                    when (request.url.encodedPath) {
+                        "/Users/AuthenticateByName" -> {
+                            respond(
+                                content = AUTHENTICATION_RESULT_JSON,
+                                status = HttpStatusCode.OK,
+                                headers =
+                                    headersOf(
+                                        HttpHeaders.ContentType to listOf(ContentType.Application.Json.toString()),
+                                    ),
+                            )
+                        }
+
+                        "/Users/Me" -> {
+                            meRequestPath = request.url.encodedPath
+                            meAuthorizationHeader = request.headers[HttpHeaders.Authorization]
+                            respond(
+                                content = """{"Name":"root","Id":"2861f5b8509e46e9a6dca9a1c396501f"}""",
+                                status = HttpStatusCode.OK,
+                                headers =
+                                    headersOf(
+                                        HttpHeaders.ContentType to listOf(ContentType.Application.Json.toString()),
+                                    ),
+                            )
+                        }
+
+                        else -> {
+                            error("unexpected path: ${request.url.encodedPath}")
+                        }
+                    }
+                }
+
+            val client =
+                JellyfinClient(
+                    baseUrl = "http://192.168.1.10:8096",
+                    device = TEST_DEVICE,
+                    engine = engine,
+                )
+
+            val session = client.session(client.authenticateByName(username = "root", password = "topsecret"))
+            val me = session.me()
+
+            assertEquals("/Users/Me", meRequestPath)
+            assertEquals(
+                """MediaBrowser Client="DLX Player", Device="Pixel 9", DeviceId="device-1", """ +
+                    """Version="0.1.0", Token="f6547397831d44718e44f89bc0d66ced"""",
+                meAuthorizationHeader,
+            )
+            assertEquals("root", me.name)
+        }
+
+    @Test
     fun `invalid credentials surface as a typed http exception`() =
         runTest {
             val engine =

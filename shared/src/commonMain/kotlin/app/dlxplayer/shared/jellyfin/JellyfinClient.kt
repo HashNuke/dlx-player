@@ -27,13 +27,14 @@ data class DeviceInfo(
     val version: String,
 ) {
     /** Builds the `MediaBrowser Client="...", Device="...", ...` header value. */
-    fun authorizationHeaderValue(): String =
+    fun authorizationHeaderValue(token: String? = null): String =
         buildString {
             append("MediaBrowser")
             append(" Client=\"").append(clientName).append('"')
             append(", Device=\"").append(deviceName).append('"')
             append(", DeviceId=\"").append(deviceId).append('"')
             append(", Version=\"").append(version).append('"')
+            if (token != null) append(", Token=\"").append(token).append('"')
         }
 }
 
@@ -64,11 +65,26 @@ class JellyfinClient(
         if (engine == null) HttpClient(configureClient) else HttpClient(engine, configureClient)
 
     /** Runs an API call, translating HTTP error statuses to [JellyfinHttpException]. */
-    private suspend fun <T> apiRequest(request: suspend () -> T): T =
+    internal suspend fun <T> apiRequest(request: suspend () -> T): T =
         try {
             request()
         } catch (cause: ResponseException) {
             throw JellyfinHttpException(statusCode = cause.response.status, cause = cause)
+        }
+
+    /**
+     * GETs an API route, authorized with the device identity and, when the
+     * caller holds one, the session's access token.
+     */
+    internal suspend inline fun <reified T> apiGet(
+        path: String,
+        token: String? = null,
+    ): T =
+        apiRequest {
+            httpClient
+                .get("$apiBase/$path") {
+                    header(HttpHeaders.Authorization, device.authorizationHeaderValue(token))
+                }.body()
         }
 
     /** Fetches public server details without requiring credentials. */
@@ -88,4 +104,17 @@ class JellyfinClient(
                     setBody(AuthenticateByNameRequest(username = username, password = password))
                 }.body()
         }
+
+    /**
+     * Starts an authenticated session from a successful login. The session
+     * authorizes every request with the login's access token.
+     */
+    fun session(auth: AuthenticationResult): JellyfinSession =
+        JellyfinSession(
+            client = this,
+            accessToken =
+                requireNotNull(auth.accessToken) {
+                    "authentication result carried no access token; cannot start a session"
+                },
+        )
 }
