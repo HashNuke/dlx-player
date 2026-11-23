@@ -1,6 +1,6 @@
 # Jellyfin client milestones
 
-Roadmap for the multiplatform Jellyfin client in `shared` (consumed by the Android and Apple apps). Each milestone is sized as a series of small TDD increments and verified against the local Jellyfin reference server before it counts as done.
+Roadmap for the multiplatform Jellyfin client in `shared`. Client only — the platform apps and their UIs are planned separately, later. Each milestone is sized as a series of small TDD increments and verified against the local Jellyfin reference server before it counts as done.
 
 ## Working agreements (every milestone)
 
@@ -29,7 +29,7 @@ Roadmap for the multiplatform Jellyfin client in `shared` (consumed by the Andro
 - `POST /Sessions/Logout` — invalidate the token *(verified)*
 - 401 during an authenticated call surfaces as "session expired", distinct from a bad login
 
-**Out of scope:** token persistence in platform keystores (integration checkpoint), Quick Connect (M6).
+**Out of scope:** token persistence in platform keystores (that is app-side work, planned with the UIs), Quick Connect (later).
 
 ## M2 — Library browsing
 
@@ -75,28 +75,9 @@ Roadmap for the multiplatform Jellyfin client in `shared` (consumed by the Andro
 
 **Out of scope:** SyncPlay group watch.
 
-## M6 — Quick Connect login
-
-**Goal:** log in on a TV by typing a short code on another device — the right login for tvOS/Android TV.
-
-- Initiate a Quick Connect session, poll until authorized, exchange the code for a token *(verified: QuickConnect controller exists; capture exact templates before implementing)*
-- Client-side state machine exposing progress so TV UIs can show the code
-
-**Out of scope:** full remote-control of other sessions.
-
-## Integration checkpoints
-
-The client is built first; the platform apps pick it up at natural points:
-
-- **After M1:** login screen on phone/tablet, token stored in the platform keystore
-- **After M2:** library grid + item lists (touch and remote navigation)
-- **After M3:** home screen with continue watching and next up
-- **After M4–M5:** basic player screens with resume support
-- **After M6:** TV login without a keyboard
-
 ## Later (not scheduled)
 
-External subtitles and track selection, trickplay, offline caching, multi-server management, Live TV, SyncPlay.
+Quick Connect code-based login (verified to exist on this server version), external subtitles and track selection, trickplay, offline caching, multi-server management, Live TV, SyncPlay.
 
 ## Verified wire-format notes (Jellyfin 12.4.0)
 
