@@ -93,12 +93,18 @@ start_container() {
 }
 
 # Generates the sample media once; safe to re-run.
+#
+# The video files are longer than the server's MinResumeDurationSeconds
+# (300s on a default Jellyfin): shorter items can never hold a resume
+# position — a mid-playback stop marks them played and zeroes the
+# position, so Continue Watching stays empty no matter what the client
+# reports.
 seed_media() {
   if [ ! -f "$MEDIA_DIR/movies/Sample Movie (2026).mp4" ]; then
     ffmpeg -y -loglevel error \
-      -f lavfi -i "testsrc2=duration=60:size=640x360:rate=24" \
-      -f lavfi -i "sine=frequency=440:duration=60" \
-      -c:v libx264 -preset veryfast -pix_fmt yuv420p -c:a aac -shortest \
+      -f lavfi -i "testsrc2=duration=400:size=640x360:rate=24" \
+      -f lavfi -i "sine=frequency=440:duration=400" \
+      -c:v libx264 -preset veryfast -crf 30 -pix_fmt yuv420p -c:a aac -shortest \
       "$MEDIA_DIR/movies/Sample Movie (2026).mp4" || return 1
   fi
   i=1
@@ -106,9 +112,9 @@ seed_media() {
     episode="$MEDIA_DIR/shows/Demo Show (2026)/Season 01/Demo Show S01E0$i - Episode $i.mp4"
     if [ ! -f "$episode" ]; then
       ffmpeg -y -loglevel error \
-        -f lavfi -i "testsrc2=duration=20:size=640x360:rate=24" \
-        -f lavfi -i "sine=frequency=$((300 + i * 100)):duration=20" \
-        -c:v libx264 -preset veryfast -pix_fmt yuv420p -c:a aac -shortest \
+        -f lavfi -i "testsrc2=duration=320:size=640x360:rate=24" \
+        -f lavfi -i "sine=frequency=$((300 + i * 100)):duration=320" \
+        -c:v libx264 -preset veryfast -crf 30 -pix_fmt yuv420p -c:a aac -shortest \
         "$episode" || return 1
     fi
     i=$((i + 1))

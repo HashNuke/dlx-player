@@ -469,3 +469,49 @@ internal val ITEMS_JSON: String =
         "StartIndex": 0
     }
     """.trimIndent()
+
+/** `GET /Users/{userId}/Items/Resume?mediaTypes=Video` after reporting a stop at 2min
+ * of the 400s sample movie (captured 2026-11-23; the server drops resume positions
+ * for items shorter than MinResumeDurationSeconds=300, hence the long movie). */
+internal val RESUME_JSON: String =
+    """
+    {
+        "Items": [
+            {
+                "Name": "Sample Movie",
+                "ServerId": "1dbcdd642f644482b13bce814f8e6ccb",
+                "Id": "a1d6b5566e7586a2ff99614f1950c129",
+                "Container": "mov,mp4,m4a,3gp,3g2,mj2",
+                "ChannelId": null,
+                "RunTimeTicks": 4000000000,
+                "ProductionYear": 2026,
+                "IsFolder": false,
+                "Type": "Movie",
+                "UserData": {
+                    "PlayedPercentage": 30,
+                    "PlaybackPositionTicks": 1200000000,
+                    "PlayCount": 1,
+                    "IsFavorite": false,
+                    "LastPlayedDate": "2026-11-23T04:59:38.0488824Z",
+                    "Played": false,
+                    "Key": "a1d6b556-6e75-86a2-ff99-614f1950c129",
+                    "ItemId": "a1d6b5566e7586a2ff99614f1950c129"
+                },
+                "VideoType": "VideoFile",
+                "ImageTags": {
+                    "Primary": "603d1cf70d73764bf09b90479631ab3f"
+                },
+                "BackdropImageTags": [],
+                "ImageBlurHashes": {
+                    "Primary": {
+                        "603d1cf70d73764bf09b90479631ab3f": "W~KxPFxOS]*Zi~|=o#X3W;e?W.n%X6X4WCWFWWj?ovniayafnmj?"
+                    }
+                },
+                "LocationType": "FileSystem",
+                "MediaType": "Video"
+            }
+        ],
+        "TotalRecordCount": 1,
+        "StartIndex": 0
+    }
+    """.trimIndent()

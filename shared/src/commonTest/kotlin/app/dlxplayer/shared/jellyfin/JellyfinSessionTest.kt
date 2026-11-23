@@ -241,6 +241,43 @@ class JellyfinSessionTest {
         }
 
     @Test
+    fun `resume items carry playback position and percentage`() =
+        runTest {
+            var resumePath: String? = null
+            var resumeMediaTypes: String? = null
+            val engine =
+                MockEngine { request ->
+                    when (request.url.encodedPath) {
+                        "/Users/AuthenticateByName" -> {
+                            respond(AUTHENTICATION_RESULT_JSON, HttpStatusCode.OK, jsonResponseHeaders)
+                        }
+
+                        "/Users/2861f5b8509e46e9a6dca9a1c396501f/Items/Resume" -> {
+                            resumePath = request.url.encodedPath
+                            resumeMediaTypes = request.url.parameters["mediaTypes"]
+                            respond(RESUME_JSON, HttpStatusCode.OK, jsonResponseHeaders)
+                        }
+
+                        else -> {
+                            error("unexpected path: ${request.url.encodedPath}")
+                        }
+                    }
+                }
+
+            val page = loggedInSession(engine).resumeItems()
+
+            assertEquals("/Users/2861f5b8509e46e9a6dca9a1c396501f/Items/Resume", resumePath)
+            assertEquals("Video", resumeMediaTypes)
+            assertEquals(1, page.totalRecordCount)
+            val item = page.items[0]
+            assertEquals("Sample Movie", item.name)
+            assertEquals("Movie", item.type)
+            assertEquals(1200000000L, item.userData?.playbackPositionTicks)
+            assertEquals(30.0, item.userData?.playedPercentage)
+            assertEquals(false, item.userData?.played)
+        }
+
+    @Test
     fun `logout posts to the sessions logout route with the token`() =
         runTest {
             var logoutMethod: HttpMethod? = null

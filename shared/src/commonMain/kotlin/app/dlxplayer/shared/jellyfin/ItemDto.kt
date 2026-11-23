@@ -35,6 +35,8 @@ data class UserDataDto(
     @SerialName("PlayCount") val playCount: Int = 0,
     @SerialName("IsFavorite") val isFavorite: Boolean = false,
     @SerialName("Played") val played: Boolean = false,
+    /** How far playback got, in percent of the runtime; only in some listings. */
+    @SerialName("PlayedPercentage") val playedPercentage: Double? = null,
 )
 
 /**

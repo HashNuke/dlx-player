@@ -59,6 +59,16 @@ class JellyfinSession internal constructor(
             )
         }
 
+    /** Video items with a saved playback position, newest activity first. */
+    suspend fun resumeItems(): PagedItems<ItemDto> =
+        authorized {
+            client.apiGet<PagedItems<ItemDto>>(
+                path = "Users/${requireNotNull(userId) { "login reported no user id" }}/Items/Resume",
+                token = accessToken,
+                parameters = listOf("mediaTypes" to "Video"),
+            )
+        }
+
     /**
      * URL of one of an item's images, ready for players and image loaders
      * that cannot send headers: the session token rides in the query as
