@@ -32,11 +32,14 @@ the default test run, and mark them clearly as integration tests.
 
 - Inspect `git status --short` and the relevant diffs before and after changes.
   Preserve user changes and unrelated work already in the worktree.
-- Do not create commits unless the user asks. When asked, make each commit one
-  small, coherent, usable checkpoint and include its implementation, tests,
-  documentation, and relevant lockfile or version-catalog changes together.
+- Commit your own changes as you go, without waiting to be asked. Make each
+  commit one small, coherent, usable checkpoint and include its implementation,
+  tests, documentation, and relevant lockfile or version-catalog changes
+  together.
 - Prefer several small commits over one large commit. Each commit should build
-  and pass tests on its own.
+  and pass tests on its own. Commit after each green red-green-refactor cycle
+  or completed checkpoint, after running the completion checks.
+- Do not push unless the user asks.
 - Avoid WIP, fixup, and vague commits. Use a concise imperative subject. Use the
   body to record motivation, architectural decisions, migration concerns, and
   verification when those details are not obvious from the diff.
